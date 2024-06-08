@@ -1,4 +1,4 @@
-name: Test
+name: test
 
 # This is the main CI workflow that runs the test suite on all pushes to main and all pull requests.
 # It runs the following jobs:
@@ -16,13 +16,7 @@ on:
         required: false
         default: "lib"
         type: string
-    secrets:
-      CODECOV_TOKEN:
-        description: "Token for codecov.io"
-        required: true
 
-# ensure that the workflow is only triggered once per PR, subsequent pushes to the PR will cancel
-# and restart the workflow. See https://docs.github.com/en/actions/using-jobs/using-concurrency
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -30,21 +24,19 @@ concurrency:
 jobs:
   required:
     runs-on: ubuntu-latest
-    name: ubuntu / ${{ matrix.toolchain }}
+    name: ubuntu - ${{ matrix.toolchain }}
     strategy:
       matrix:
-        # run on stable and beta to ensure that tests won't break on the next version of the rust
-        # toolchain
         toolchain: [stable, beta]
     steps:
       - uses: actions/checkout@v4
-      - name: Install ${{ matrix.toolchain }}
+      - name: linux deps
+        run: sudo apt install libasound2-dev libudev-dev
+      - name: install rust ${{ matrix.toolchain }}
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
-      # enable this ci template to run regardless of whether the lockfile is checked in or not
       - name: cargo generate-lockfile
-        if: hashFiles('Cargo.lock') == ''
         run: cargo generate-lockfile
       - name: cargo test --locked
         run: cargo test --locked --all-features --all-targets
@@ -75,12 +67,14 @@ jobs:
     # https://github.com/jonhoo/fantoccini/blob/fde336472b712bc7ebf5b4e772023a7ba71b2262/Cargo.toml#L47-L49.
     # This action is run on ubuntu with the stable toolchain, as it is not expected to fail
     runs-on: ubuntu-latest
-    name: ubuntu / stable / minimal-versions
+    name: ubuntu - stable - minimal-versions
     steps:
       - uses: actions/checkout@v4
-      - name: Install Rust stable
+      - name: linux deps
+        run: sudo apt install libasound2-dev libudev-dev
+      - name: install rust stable
         uses: dtolnay/rust-toolchain@stable
-      - name: Install nightly for -Zdirect-minimal-versions
+      - name: install nightly for -Zdirect-minimal-versions
         uses: dtolnay/rust-toolchain@nightly
       - name: rustup default stable
         run: rustup default stable
@@ -88,12 +82,12 @@ jobs:
         run: cargo +nightly update -Zdirect-minimal-versions
       - name: cargo test
         run: cargo test --locked --all-features --all-targets
-      - name: Cache Cargo dependencies
+      - name: cache cargo dependencies
         uses: Swatinem/rust-cache@v2
   os-check:
     # run cargo test on mac and windows
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }} / stable
+    name: ${{ matrix.os }} - stable
     strategy:
       fail-fast: false
       matrix:
@@ -105,62 +99,14 @@ jobs:
       #   if: runner.os == 'Windows'
       # - run: vcpkg install openssl:x64-windows-static-md
       #   if: runner.os == 'Windows'
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v4
-      - name: Install Rust stable
+      - name: install rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: cargo generate-lockfile
-        if: hashFiles('Cargo.lock') == ''
         run: cargo generate-lockfile
       - name: cargo test
         run: cargo test --locked --all-features --all-targets
-      - name: Cache Cargo dependencies
+      - name: cache cargo dependencies
         uses: Swatinem/rust-cache@v2
-  coverage:
-    # use llvm-cov to build and collect coverage and outputs in a format that
-    # is compatible with codecov.io
-    #
-    # note that codecov as of v4 requires that CODECOV_TOKEN from
-    #
-    #   https://app.codecov.io/gh/<user or org>/<project>/settings
-    #
-    # is set in two places on your repo:
-    #
-    # - https://github.com/jonhoo/guardian/settings/secrets/actions
-    # - https://github.com/jonhoo/guardian/settings/secrets/dependabot
-    #
-    # (the former is needed for codecov uploads to work with Dependabot PRs)
-    #
-    # PRs coming from forks of your repo will not have access to the token, but
-    # for those, codecov allows uploading coverage reports without a token.
-    # it's all a little weird and inconvenient. see
-    #
-    #   https://github.com/codecov/feedback/issues/112
-    #
-    # for lots of more discussion
-    runs-on: ubuntu-latest
-    name: ubuntu / stable / coverage
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: llvm-tools-preview
-      - name: cargo install cargo-llvm-cov
-        uses: taiki-e/install-action@cargo-llvm-cov
-      - name: cargo generate-lockfile
-        if: hashFiles('Cargo.lock') == ''
-        run: cargo generate-lockfile
-      - name: cargo llvm-cov
-        run: cargo llvm-cov --locked --all-features --lcov --output-path lcov.info
-      - name: Record Rust version
-        run: echo "RUST=$(rustc --version)" >> "$GITHUB_ENV"
-      - name: Cache Cargo dependencies
-        uses: Swatinem/rust-cache@v2
-      - name: Upload to codecov.io
-        uses: codecov/codecov-action@v4
-        with:
-          fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,RUST
+
