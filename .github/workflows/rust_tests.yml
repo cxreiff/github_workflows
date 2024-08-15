@@ -1,16 +1,12 @@
-name: test
+name: tests
 
-# This is the main CI workflow that runs the test suite on all pushes to main and all pull requests.
-# It runs the following jobs:
-# - required: runs the test suite on ubuntu with stable and beta rust toolchains
-# - minimal: runs the test suite with the minimal versions of the dependencies that satisfy the
-#   requirements of this crate, and its dependencies
-# - os-check: runs the test suite on mac and windows
-# - coverage: runs the test suite and collects coverage information
-# See check.yml for information about how the concurrency cancellation and workflow triggering works
 on:
   workflow_call:
     inputs:
+      linux_dependencies:
+        description: "Linux libs to install before building."
+        required: false
+        type: string
       crate_type:
         description: "The type of crate to test (lib or bin)"
         required: false
@@ -30,19 +26,28 @@ jobs:
         toolchain: [stable, beta]
     steps:
       - uses: actions/checkout@v4
-      - name: linux deps
-        run: sudo apt install libasound2-dev libudev-dev
+
+      - name: linux dependencies
+        if: inputs.linux_dependencies != ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends ${{ inputs.linux_dependencies }}
+
       - name: install rust ${{ matrix.toolchain }}
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.toolchain }}
+
       - name: cargo generate-lockfile
         run: cargo generate-lockfile
+
       - name: cargo test --locked
         run: cargo test --locked --all-features --all-targets
+
       - name: cargo test --doc
         if: ${{ inputs.crate_type == 'lib' }}
         run: cargo test --locked --all-features --doc
+
   os-check:
     # run cargo test on mac and windows
     runs-on: ${{ matrix.os }}
@@ -60,12 +65,16 @@ jobs:
       #   if: runner.os == 'Windows'
       - name: checkout
         uses: actions/checkout@v4
+
       - name: install rust stable
         uses: dtolnay/rust-toolchain@stable
+
       - name: cargo generate-lockfile
         run: cargo generate-lockfile
+
       - name: cargo test
         run: cargo test --locked --all-features --all-targets
+
       - name: cache cargo dependencies
         uses: Swatinem/rust-cache@v2
 

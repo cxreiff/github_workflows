@@ -1,0 +1,4 @@
+[workspace]
+
+dependencies_update = true
+pr_labels = ["release"]
