@@ -38,7 +38,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
       - name: linux deps
-        run: sudo apt install libasound2-dev libudev-dev
+        run: sudo apt install libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
       - name: install rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -53,7 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: linux deps
-        run: sudo apt install libasound2-dev libudev-dev
+        run: sudo apt install libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
       - name: install rust nightly
         uses: dtolnay/rust-toolchain@nightly
       - name: cargo doc
