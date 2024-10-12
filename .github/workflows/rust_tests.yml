@@ -12,6 +12,9 @@ on:
         required: false
         default: "lib"
         type: string
+    secrets:
+      DEDICATED_TOKEN:
+        description: "Github token with repo permissions."
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -26,6 +29,8 @@ jobs:
         toolchain: [stable, beta]
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DEDICATED_TOKEN }}
 
       - name: linux dependencies
         if: inputs.linux_dependencies != ''
@@ -65,6 +70,8 @@ jobs:
       #   if: runner.os == 'Windows'
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DEDICATED_TOKEN }}
 
       - name: install rust stable
         uses: dtolnay/rust-toolchain@stable

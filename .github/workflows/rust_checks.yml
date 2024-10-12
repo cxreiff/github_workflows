@@ -2,6 +2,10 @@ name: checks
 
 on:
   workflow_call:
+    secrets:
+      DEDICATED_TOKEN:
+        description: "Github token with repo permissions."
+
 
 env:
   CARGO_TERM_COLOR: always
@@ -17,6 +21,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DEDICATED_TOKEN }}
       - name: install rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -37,6 +43,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DEDICATED_TOKEN }}
       - name: linux deps
         run: sudo apt install libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
       - name: install rust stable
@@ -51,7 +59,10 @@ jobs:
     name: doc
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DEDICATED_TOKEN }}
       - name: linux deps
         run: sudo apt install libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
       - name: install rust nightly
