@@ -1,0 +1,16 @@
+name: itch.io
+
+on:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+
+jobs:
+  itch-io:
+    uses: cxreiff/github_workflows/.github/workflows/rust_release_itchio.yml@main
+    secrets:
+      DEDICATED_TOKEN: ${{ secrets.DEDICATED_TOKEN }}
+      BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+    with:
+      itch_target: cxreiff/example
+      workflow_run_id: ${{ github.event.workflow_run.id }}
