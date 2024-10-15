@@ -73,5 +73,5 @@ jobs:
               --fix-permissions \
               --userversion='${{ env.VERSION }}' \
               upload/"${channel}" \
-              '${{ env.ITCH_TARGET }}':"${channel#package-}"
+              '${{ inputs.itch_target }}':"${channel#package-}"
           done
