@@ -52,7 +52,7 @@ jobs:
         run: |
           mkdir upload
           for channel in $(ls tars); do
-            if [[ $channel == *-artifacts-build-local-* ]]; then
+            if [[ "$channel" == *"artifacts-build-local-"* ]]; then
               mkdir "upload/${channel%%.*}"; mv tars/${channel} "upload/${channel%%.*}"
             fi
           done
