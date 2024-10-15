@@ -2,6 +2,9 @@ name: tests
 
 on:
   workflow_call:
+    secrets:
+      DEDICATED_TOKEN:
+        description: "Github token with repo permissions."
     inputs:
       linux_dependencies:
         description: "Linux libs to install before building."
@@ -12,9 +15,6 @@ on:
         required: false
         default: "lib"
         type: string
-    secrets:
-      DEDICATED_TOKEN:
-        description: "Github token with repo permissions."
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}

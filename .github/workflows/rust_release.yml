@@ -6,18 +6,18 @@ permissions:
 
 on:
   workflow_call:
-    inputs:
-      linux_dependencies:
-        description: "Linux libs to install before building."
-        required: false
-        default: ""
-        type: string
     secrets:
       DEDICATED_TOKEN:
         description: "Github token with repo permissions."
       CARGO_REGISTRY_TOKEN:
         description: Token to publish to crates.io."
         required: true
+    inputs:
+      linux_dependencies:
+        description: "Linux libs to install before building."
+        required: false
+        default: ""
+        type: string
 
 jobs:
   release:
@@ -30,7 +30,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.DEDICATED_TOKEN }}
 
-      - name: linux deps
+      - name: linux dependencies
         if: ${{ inputs.linux_dependencies != '' }}
         run: |
           sudo apt-get update

@@ -5,7 +5,11 @@ on:
     secrets:
       DEDICATED_TOKEN:
         description: "Github token with repo permissions."
-
+    inputs:
+      linux_dependencies:
+        description: "Linux libs to install before building."
+        required: false
+        type: string
 
 env:
   CARGO_TERM_COLOR: always
@@ -45,8 +49,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.DEDICATED_TOKEN }}
-      - name: linux deps
-        run: sudo apt install libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+      - name: linux dependencies
+        if: ${{ inputs.linux_dependencies != '' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends ${{ inputs.linux_dependencies }}
       - name: install rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -63,8 +70,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.DEDICATED_TOKEN }}
-      - name: linux deps
-        run: sudo apt install libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+      - name: linux dependencies
+        if: ${{ inputs.linux_dependencies != '' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends ${{ inputs.linux_dependencies }}
       - name: install rust nightly
         uses: dtolnay/rust-toolchain@nightly
       - name: cargo doc

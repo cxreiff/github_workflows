@@ -2,6 +2,11 @@ name: itch.io
 
 on:
   workflow_call:
+    secrets:
+      DEDICATED_TOKEN:
+        description: "Github token with repo permissions."
+      BUTLER_CREDENTIALS:
+        description: "Itch.io API credentials."
     inputs:
       itch_target:
         description: "Itch.io target project (username/project)."
@@ -11,11 +16,6 @@ on:
         description: "Run ID of workflow that generated the artifacts (github.event.workflow_run.id)"
         required: true
         type: string
-    secrets:
-      DEDICATED_TOKEN:
-        description: "Github token with repo permissions."
-      BUTLER_CREDENTIALS:
-        description: "Itch.io API credentials."
 
 jobs:
   # determine the version number for this workflow.

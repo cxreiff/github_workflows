@@ -11,3 +11,5 @@ jobs:
     permissions:
       checks: write
     uses: cxreiff/github_workflows/.github/workflows/rust_checks.yml@main
+    with:
+      linux_dependencies: ""

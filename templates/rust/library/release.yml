@@ -17,3 +17,5 @@ jobs:
       contents: write
     secrets:
       CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+    with:
+      linux_dependencies: ""
