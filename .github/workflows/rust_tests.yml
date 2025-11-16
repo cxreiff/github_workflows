@@ -27,6 +27,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: clear disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tools-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+          docker-images: true
+
       - name: linux dependencies
         if: inputs.linux_dependencies != ''
         run: |
@@ -42,7 +53,7 @@ jobs:
         run: cargo generate-lockfile
 
       - name: cargo test --locked
-        run: cargo test --locked --all-features --all-targets --jobs 1
+        run: cargo test --locked --all-features --all-targets
 
       - name: cargo test --doc
         if: ${{ inputs.crate_type == 'lib' }}
